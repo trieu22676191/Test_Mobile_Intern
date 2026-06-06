@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
+import { MailChooser } from './components/MailChooser';
 import { Toast } from './components/Toast';
 import { articleImages, copy } from './data/content';
 import { AboutPage } from './pages/AboutPage';
@@ -19,6 +20,7 @@ export default function App() {
   const [isDark, setIsDark] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [notice, setNotice] = useState(null);
+  const [pendingMail, setPendingMail] = useState(null);
   const [favoritePosts, setFavoritePosts] = useState([]);
   const [returnRoute, setReturnRoute] = useState({ screen: 'home', y: 0 });
   const [pendingScrollY, setPendingScrollY] = useState(null);
@@ -93,28 +95,34 @@ export default function App() {
   };
 
   const submitContact = async () => {
-    const validEmail = /\S+@\S+\.\S+/.test(form.email);
-    if (!form.name.trim() || !validEmail || !form.message.trim()) {
+    const name = form.name.trim();
+    const email = form.email.trim();
+    const message = form.message.trim();
+    const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    if (!name || !validEmail || !message) {
       setNotice({ type: 'fail', text: t.fail });
       return;
     }
 
-    const subject = encodeURIComponent(`Contact from ${form.name}`);
-    const body = encodeURIComponent(`${form.message}\n\nFrom: ${form.name}\nEmail: ${form.email}`);
-    const url = `mailto:trieu22676191@gmail.com?subject=${subject}&body=${body}`;
+    const subject = encodeURIComponent(`Contact from ${name}`);
+    const body = encodeURIComponent(`${message}\n\nFrom: ${name}\nEmail: ${email}`);
+    const recipient = 'trieu22676191@gmail.com';
 
+    setPendingMail({
+      mailtoUrl: `mailto:${recipient}?subject=${subject}&body=${body}`,
+      gmailUrl: `https://mail.google.com/mail/?view=cm&fs=1&to=${recipient}&su=${subject}&body=${body}`,
+    });
+  };
+
+  const openMailApp = async (url) => {
     try {
-      const canOpenEmail = await Linking.canOpenURL(url);
-      if (!canOpenEmail) {
-        setNotice({ type: 'fail', text: t.fail });
-        return;
-      }
-
       await Linking.openURL(url);
+      setPendingMail(null);
       setNotice({ type: 'success', text: t.success });
       setForm({ name: '', email: '', message: '' });
     } catch {
-      setNotice({ type: 'fail', text: t.fail });
+      setNotice({ type: 'fail', text: t.mailFail });
     }
   };
 
@@ -174,6 +182,14 @@ export default function App() {
 
           <Footer t={t} theme={theme} />
         </ScrollView>
+        <MailChooser
+          visible={Boolean(pendingMail)}
+          t={t}
+          theme={theme}
+          onDefaultEmail={() => pendingMail && openMailApp(pendingMail.mailtoUrl)}
+          onGmail={() => pendingMail && openMailApp(pendingMail.gmailUrl)}
+          onClose={() => setPendingMail(null)}
+        />
         <Toast notice={notice} theme={theme} />
       </SafeAreaView>
     </SafeAreaProvider>
