@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Football Legends",
+    "slug": "football-legends",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/logo.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#101418"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.mobileinternhub.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#101418",
+        "foregroundImage": "./assets/logo.png",
+        "monochromeImage": "./assets/logo.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/logo.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "71999f74-5e37-4cf1-b9de-13dc95949c91"
+      }
+    }
+  }
+}
